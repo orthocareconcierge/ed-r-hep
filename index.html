@@ -406,10 +406,16 @@ body {
 
     <div id="today-tab">
       <!-- DAILY SECTION -->
-      <div class="section-label">Today's Plan</div>
+      <div class="section-label">Daily, Complete All</div>
       <div class="card card-gold intro-card"><p id="daily-intro"></p></div>
       <div class="prog-pill" id="daily-progress">0 of 0 done today</div>
       <div id="daily-list"></div>
+
+      <!-- ROTATION SECTION -->
+      <div class="section-label" style="margin-top:28px;">Rotation, Pick 3 to 4 Per Day</div>
+      <div class="card card-gold intro-card"><p id="pool-intro"></p></div>
+      <div class="prog-pill" id="pool-progress" onclick="poolProgressTap()">0 of 0 this rotation</div>
+      <div id="pool-list"></div>
 
       <!-- SESSION WRAP-UP -->
       <div class="card" style="margin-top:18px;">
@@ -509,25 +515,34 @@ body {
 const CLIENT_NAME = 'Ed';
 
 // --- DAILY SECTION ---------------------------------------------------
-const dailyIntro = 'This is your daily program. Checking it off means you did it today. Tap an exercise for cues and video.';
+const dailyIntro = 'Do all three of these every day. Checking it off means you did it today. Tap an exercise for cues and video.';
 const dailyExercises = [
   { name: 'Transversus Abdominis Hold', rx: '5 sec hold · 10 reps · every hour', log: false, video: 'transverse-abdominus.mp4',
     cues: ['Find your hip bones at the front and hook your fingers just inside them on either side.', 'Gently draw your lower belly inward and feel the muscle pop up under your fingers.', 'Keep breathing normally. Do not hold your breath or tuck the pelvis.', 'This is a low-effort, deep contraction, not a hard brace.'] },
-  { name: 'Pelvic Tilt', rx: '5 sec holds · 10 reps · as needed to reset', log: false, video: 'pelvic-tilt.mp4',
-    cues: ['Lie on your back with knees bent and feet flat.', 'Gently flatten your low back into the floor by tilting the pelvis, then release.', 'Keep it a small, controlled motion. Use it to reset whenever the back feels stiff.'] },
   { name: 'Break the Stick', rx: '5 sec hold · 5 reps AM · 5 reps PM', log: false, video: 'break-the-stick.mp4',
     cues: ['Lie on your back with your feet in tabletop, hips and knees at 90/90.', 'Weave a stick between your legs so one leg rests on top of it and the other sits behind it, then hold either end.', 'Keep your low back flat on the floor throughout.', 'Press the top leg up into the stick and the bottom leg down into it, as if trying to break the stick in half, without letting your legs move.'] },
-  { name: 'PRI Hip Glide with ER', rx: '10 reps per side · daily', log: false, video: 'pri-with-er.mp4',
-    cues: ['Lie on your back with your feet in a tabletop position, or 90/90.', 'Keep your feet and knees hip width apart.', 'If needed, place a yoga block or small foam roller between your knees for feedback.', 'Keep your low back flat while you raise one knee toward the ceiling and push the other hip down into the ground.', 'The raised, elevated hip is the one that rotates out: press that raised knee into the block and rotate that same foot outward, while the other hip stays pushed down.', 'Move slowly and with control, alternating each time.'] },
   { name: 'Snow Angels on Foam Roller', rx: '20 reps · 2 sets · daily', log: false, video: 'chicken-wings.mp4',
-    cues: ['Lie lengthwise along the foam roller with your head and pelvis supported, knees bent and feet flat for stability.', 'Start with your arms down by your sides, palms down.', 'Lift both arms overhead with your elbows by your ears and palms facing up.', 'Slowly cactus the arms by bending the elbows, keeping the backs of your hands and your elbows as close to the floor as possible.', 'Once in the field goal post position, keep the bend in your elbows and draw them down toward your waist, then cycle again from the start.'] },
-  { name: 'Sidelying Hip Abduction', rx: '12 to 15 reps · 2 sets · each side', log: true, video: 'sidelying-leg-lift.mp4',
-    cues: ['Lie on your side in a straight line, bottom knee bent for stability.', 'Lift the top leg, leading with the heel and keeping the toes pointed forward.', 'Keep your hips stacked. Do not roll backward as you lift.'] }
+    cues: ['Lie lengthwise along the foam roller with your head and pelvis supported, knees bent and feet flat for stability.', 'Start with your arms down by your sides, palms down.', 'Lift both arms overhead with your elbows by your ears and palms facing up.', 'Slowly cactus the arms by bending the elbows, keeping the backs of your hands and your elbows as close to the floor as possible.', 'Once in the field goal post position, keep the bend in your elbows and draw them down toward your waist, then cycle again from the start.'] }
 ];
 
-// --- ROTATION SECTION (unused for this patient) ----------------------
-const poolIntro = '';
-const poolExercises = [];
+// --- ROTATION SECTION ------------------------------------------------
+const poolIntro = 'Pick 3 to 4 of these each day and check them off. The list carries over day to day and resets once you have worked through all of them.';
+const poolExercises = [
+  { name: 'Pelvic Tilt', rx: '5 sec holds · 10 reps · as needed to reset', log: false, video: 'pelvic-tilt.mp4',
+    cues: ['Lie on your back with knees bent and feet flat.', 'Gently flatten your low back into the floor by tilting the pelvis, then release.', 'Keep it a small, controlled motion. Use it to reset whenever the back feels stiff.'] },
+  { name: 'PRI Hip Glide with ER', rx: '10 reps per side · daily', log: false, video: 'pri-with-er.mp4',
+    cues: ['Lie on your back with your feet in a tabletop position, or 90/90.', 'Keep your feet and knees hip width apart.', 'If needed, place a yoga block or small foam roller between your knees for feedback.', 'Keep your low back flat while you raise one knee toward the ceiling and push the other hip down into the ground.', 'The raised, elevated hip is the one that rotates out: press that raised knee into the block and rotate that same foot outward, while the other hip stays pushed down.', 'Move slowly and with control, alternating each time.'] },
+  { name: 'Sidelying Hip Abduction', rx: '12 to 15 reps · 2 sets · each side', log: true, video: 'sidelying-leg-lift.mp4',
+    cues: ['Lie on your side in a straight line, bottom knee bent for stability.', 'Lift the top leg, leading with the heel and keeping the toes pointed forward.', 'Keep your hips stacked. Do not roll backward as you lift.'] },
+  { name: 'Hip Hike', rx: '20 reps per side · 2 sets', log: true, video: '',
+    cues: ['Stand with one leg on a stair or step, the other foot hanging off the side.', 'Lift the foot arch of the stance leg.', 'Let your hanging foot drop slowly toward the floor by dropping the pelvis on that side, but do not bend the knee or hip of the hanging leg.', 'Drive out of the stance leg to lift the hip back up to level.', 'Move slow and controlled. Keep the stance knee tracking over the toes, do not let it drop in.'] },
+  { name: 'Standing Clam', rx: '12 reps per side · 2 sets', log: true, video: '',
+    cues: ['Place a looped resistance band just above your knees.', 'Stand with feet shoulder-width apart, knees slightly bent into a squat position.', 'Hinge forward at the hips and stick your bottom back, tuck the pelvis under.', 'Keep one foot planted and rotate one knee outward like a clamshell.', 'Focus on the outside hip doing the work. Keep your pelvis level.', 'Return slowly with control. Switch sides.'] },
+  { name: 'Standing Multifidi', rx: '12 to 15 reps per side · 2 sets', log: true, video: '',
+    cues: ['Start in a standing position with a solid surface behind you just below hip height, like a chair or table.', 'Bend your knees so that your bottom is just barely touching the surface, with no weight through the bottom.', 'Tuck your pelvis under and hinge forward at the waist without letting your spine curve.', 'Cross your arms on your chest.', 'Without moving your pelvis from the surface, rotate your upper trunk to open the chest.', 'Do not bend to the side.', 'Pause at the top and slowly return to the starting position.', 'Complete all reps on one side before moving to the other side.'] },
+  { name: 'Bridging', rx: '12 reps · 3 sec hold · 2 sets', log: true, video: '',
+    cues: ['Lie on your back with knees bent and feet flat, hip-width apart.', 'Engage belly button to spine, tilt your pelvis under so your low back is flat on the floor.', 'Press through your heels and lift your hips up, squeezing your glutes at the top. Do not drop the pelvic tilt or core engagement.', 'Drive from the glutes, not the low back. Do not arch.', 'Lower with control. Keep the rib cage down throughout.'] }
+];
 
 // --- GOALS -----------------------------------------------------------
 const goals = [
@@ -634,8 +649,11 @@ function doneCount(section) {
 function renderToday() {
   document.getElementById('client-name-hero').textContent = CLIENT_NAME;
   document.getElementById('daily-intro').textContent = dailyIntro;
+  document.getElementById('pool-intro').textContent = poolIntro;
   document.getElementById('daily-list').innerHTML = sectionData('daily').map((ex, i) => exerciseCard('daily', i, ex)).join('');
+  document.getElementById('pool-list').innerHTML = sectionData('pool').map((ex, i) => exerciseCard('pool', i, ex)).join('');
   updateProgress('daily');
+  updateProgress('pool');
   document.getElementById('session-notes').value = hepLog['s-' + todayKey() + '-notes'] || '';
 }
 
