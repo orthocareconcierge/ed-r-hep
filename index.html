@@ -411,6 +411,12 @@ body {
       <div class="prog-pill" id="daily-progress">0 of 0 done today</div>
       <div id="daily-list"></div>
 
+      <!-- SHOULDER SECTION -->
+      <div class="section-label" style="margin-top:28px;">Shoulder, Complete All</div>
+      <div class="card card-gold intro-card"><p id="shoulder-intro"></p></div>
+      <div class="prog-pill" id="shoulder-progress">0 of 0 done today</div>
+      <div id="shoulder-list"></div>
+
       <!-- ROTATION SECTION -->
       <div class="section-label" style="margin-top:28px;">Rotation, Pick 3 to 4 Per Day</div>
       <div class="card card-gold intro-card"><p id="pool-intro"></p></div>
@@ -544,6 +550,21 @@ const poolExercises = [
     cues: ['Lie on your back with knees bent and feet flat, hip-width apart.', 'Engage belly button to spine, tilt your pelvis under so your low back is flat on the floor.', 'Press through your heels and lift your hips up, squeezing your glutes at the top. Do not drop the pelvic tilt or core engagement.', 'Drive from the glutes, not the low back. Do not arch.', 'Lower with control. Keep the rib cage down throughout.'] }
 ];
 
+// --- SHOULDER SECTION ------------------------------------------------
+const shoulderIntro = 'For your right shoulder and upper arm. Do all of these each day. Keep everything easy and pain-free, and set your shoulder blade back and down before each one.';
+const shoulderExercises = [
+  { name: 'Posture Openers', rx: '5 sec holds · 5 reps · every hour', log: false, video: 'posture-openers.mp4',
+    cues: ['Stand tall with your arms relaxed by your sides.', 'Rotate your palms outward so they face forward.', 'Squeeze your shoulder blades back and down, then hold for 5 seconds.'] },
+  { name: 'First Rib Mobilization with Strap', rx: '15 reps per side · 2 sets daily', log: false, video: 'first-rib-mob.mp4',
+    cues: ['Loop the strap over your shoulder, as close to the base of the neck as possible.', 'Whichever side the strap is on, place that hand behind your back to keep the shoulder blade down.', 'Apply a gentle downward pull as you side-bend and rotate your head away.', 'Keep it easy and rhythmic, with no forcing or pinching.'] },
+  { name: 'ER Pull Outs', rx: '10 reps · 2 sec hold · 2 sets · 2x daily', log: false, video: 'er-pull-outs.mp4',
+    cues: ['Hold an elastic band with both elbows bent to 90 degrees and tucked at your sides.', 'Pull your hands apart, away from your stomach, keeping your elbows in and the 90 degree angle the whole time.', 'Stand with your back against a corner or a foam roller to keep your posture upright.', 'Return slowly with control.'] },
+  { name: 'Wall Ball', rx: '30 to 60 sec · 2 sets', log: false, video: 'wall-ball.mp4',
+    cues: ['Flexed position: stand facing a wall and place a ball between your palm and the wall, arm straight out in front at shoulder height.', 'Abducted position: turn so your side is to the wall and place the ball between your palm and the wall with your arm straight out to the side at shoulder height.', 'In both positions, set your shoulder blade back and down and keep your elbow straight.', 'Use small movements from the shoulder blade to move the ball: up and down, side to side, clockwise circles, and counterclockwise circles.'] },
+  { name: 'Serratus Roll Ups with Band at Elbows', rx: '10 reps · 1 sec hold · 2 sets · daily', log: false, video: 'serratus-roll-ups.mp4',
+    cues: ['Loop an elastic band around both arms at your elbows, not your wrists.', 'Place your forearms and hands on a wall, or on a foam roller, with your elbows bent and arms pointing up toward the ceiling.', 'Push your hands into the surface to engage your shoulder blades, then slide your arms upward.', 'Return to the start with control and repeat.'] }
+];
+
 // --- GOALS -----------------------------------------------------------
 const goals = [
   { title: 'Return to Yoga, Pain-Free', desc: 'Get back to your full practice without pain and without compensating to get into poses.' },
@@ -631,9 +652,11 @@ function showProgramTab(tab) {
 }
 
 // ---------- SECTION HELPERS ----------
-function sectionData(section) { return section === 'daily' ? dailyExercises : poolExercises; }
+function sectionData(section) { return section === 'daily' ? dailyExercises : section === 'shoulder' ? shoulderExercises : poolExercises; }
 function sectionPrefix(section) {
-  return section === 'daily' ? ('d-' + todayKey()) : ('p-r' + poolRound);
+  if (section === 'daily') return 'd-' + todayKey();
+  if (section === 'shoulder') return 'sh-' + todayKey();
+  return 'p-r' + poolRound;
 }
 function exKey(section, idx)    { return sectionPrefix(section) + '-ex' + idx; }
 function checkKey(section, idx) { return exKey(section, idx) + '-done'; }
@@ -649,10 +672,13 @@ function doneCount(section) {
 function renderToday() {
   document.getElementById('client-name-hero').textContent = CLIENT_NAME;
   document.getElementById('daily-intro').textContent = dailyIntro;
+  document.getElementById('shoulder-intro').textContent = shoulderIntro;
   document.getElementById('pool-intro').textContent = poolIntro;
   document.getElementById('daily-list').innerHTML = sectionData('daily').map((ex, i) => exerciseCard('daily', i, ex)).join('');
+  document.getElementById('shoulder-list').innerHTML = sectionData('shoulder').map((ex, i) => exerciseCard('shoulder', i, ex)).join('');
   document.getElementById('pool-list').innerHTML = sectionData('pool').map((ex, i) => exerciseCard('pool', i, ex)).join('');
   updateProgress('daily');
+  updateProgress('shoulder');
   updateProgress('pool');
   document.getElementById('session-notes').value = hepLog['s-' + todayKey() + '-notes'] || '';
 }
@@ -736,7 +762,7 @@ function updateProgress(section) {
   const done = doneCount(section);
   const el = document.getElementById(section + '-progress');
   if (!el) return;
-  if (section === 'daily') {
+  if (section === 'daily' || section === 'shoulder') {
     el.textContent = done + ' of ' + total + ' done today';
     el.classList.toggle('complete', done === total && total > 0);
   } else {
@@ -769,6 +795,7 @@ function upsertTodayHistory() {
   history.push({
     date: date,
     dailyDone: doneCount('daily'), dailyTotal: dailyExercises.length,
+    shoulderDone: doneCount('shoulder'), shoulderTotal: shoulderExercises.length,
     poolDone: doneCount('pool'), poolTotal: poolExercises.length,
     round: poolRound,
     notes: hepLog['s-' + date + '-notes'] || ''
@@ -778,10 +805,11 @@ function upsertTodayHistory() {
 function syncTodayHistory() {
   const date = todayKey();
   history = history.filter(h => h.date !== date);
-  if (doneCount('daily') > 0 || doneCount('pool') > 0) {
+  if (doneCount('daily') > 0 || doneCount('shoulder') > 0 || doneCount('pool') > 0) {
     history.push({
       date: date,
       dailyDone: doneCount('daily'), dailyTotal: dailyExercises.length,
+      shoulderDone: doneCount('shoulder'), shoulderTotal: shoulderExercises.length,
       poolDone: doneCount('pool'), poolTotal: poolExercises.length,
       round: poolRound,
       notes: hepLog['s-' + date + '-notes'] || ''
@@ -835,7 +863,7 @@ function renderProgress() {
     const sorted = [...history].sort((a, b) => new Date(b.date) - new Date(a.date));
     html += sorted.map(h => `<div class="history-card">
       <div class="history-date">${formatDate(h.date)}</div>
-      <div class="history-title">${h.poolTotal ? `Daily ${h.dailyDone}/${h.dailyTotal} &nbsp;&middot;&nbsp; Rotation ${h.poolDone}/${h.poolTotal}` : `${h.dailyDone}/${h.dailyTotal} done`}</div>
+      <div class="history-title">Daily ${h.dailyDone}/${h.dailyTotal}${h.shoulderTotal ? ` &nbsp;&middot;&nbsp; Shoulder ${h.shoulderDone}/${h.shoulderTotal}` : ''}${h.poolTotal ? ` &nbsp;&middot;&nbsp; Rotation ${h.poolDone}/${h.poolTotal}` : ''}</div>
       ${h.notes ? `<div class="history-note">${h.notes}</div>` : ''}
     </div>`).join('');
   }
@@ -979,7 +1007,7 @@ function renderReport() {
     sorted.forEach(e => {
       h += `<div class="rep-item">
         <div class="rep-when">${formatDate(e.date)}</div>
-        <div class="rep-line">${e.poolTotal ? `Daily ${e.dailyDone}/${e.dailyTotal} &nbsp;&middot;&nbsp; Rotation ${e.poolDone}/${e.poolTotal}` : `${e.dailyDone}/${e.dailyTotal} exercises`}</div>
+        <div class="rep-line">Daily ${e.dailyDone}/${e.dailyTotal}${e.shoulderTotal ? ` &nbsp;&middot;&nbsp; Shoulder ${e.shoulderDone}/${e.shoulderTotal}` : ''}${e.poolTotal ? ` &nbsp;&middot;&nbsp; Rotation ${e.poolDone}/${e.poolTotal}` : ''}</div>
         ${e.notes ? `<div class="rep-note">&ldquo;${e.notes}&rdquo;</div>` : ''}
       </div>`;
     });
